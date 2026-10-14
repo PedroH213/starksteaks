@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logo from "@/assets/logo.png.asset.json";
 import ironMan from "@/assets/food/iron-man-prime.jpg";
 import hulk from "@/assets/food/hulk-smash.jpg";
@@ -93,15 +93,44 @@ function Card({ it }: { it: Item }) {
 
 function Index() {
   const [active, setActive] = useState("pratos");
+  const lockUntil = useRef(0);
 
   useEffect(() => {
-    const spy = new IntersectionObserver(
-      (es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id)),
-      { rootMargin: "-30% 0px -60% 0px" },
-    );
-    menu.forEach((s) => { const el = document.getElementById(s.id); if (el) spy.observe(el); });
-    return () => spy.disconnect();
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (Date.now() < lockUntil.current) return;
+      const doc = document.documentElement;
+      if (window.scrollY + window.innerHeight >= doc.scrollHeight - 4) {
+        setActive(menu[menu.length - 1]!.id);
+        return;
+      }
+      const line = window.innerHeight * 0.3;
+      let current = menu[0]!.id;
+      for (const s of menu) {
+        const el = document.getElementById(s.id);
+        if (el && el.getBoundingClientRect().top <= line) current = s.id;
+      }
+      setActive(current);
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    const unlock = () => { lockUntil.current = 0; onScroll(); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    window.addEventListener("scrollend", unlock);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scrollend", unlock);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
+
+  const select = (id: string) => {
+    setActive(id);
+    lockUntil.current = Date.now() + 1000;
+  };
 
   useEffect(() => {
     document.getElementById(`chip-${active}`)?.scrollIntoView({ block: "nearest", inline: "center" });
@@ -121,7 +150,7 @@ function Index() {
         <ul className="flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
           {menu.map((s) => (
             <li key={s.id} className="shrink-0">
-              <a id={`chip-${s.id}`} href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}
+              <a id={`chip-${s.id}`} href={`#${s.id}`} onClick={() => select(s.id)} aria-current={active === s.id ? "true" : undefined}
                 className={`flex items-center min-h-11 px-4 rounded-full border text-base transition-colors ${active === s.id ? "bg-gold text-ink border-gold font-semibold" : "text-soft border-gold/30 hover:border-gold"}`}>
                 {s.title}
               </a>
@@ -136,7 +165,7 @@ function Index() {
             <ul className="border-l border-gold/25">
               {menu.map((s) => (
                 <li key={s.id}>
-                  <a href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}
+                  <a href={`#${s.id}`} onClick={() => select(s.id)} aria-current={active === s.id ? "true" : undefined}
                     className={`${link(s.id)} -ml-px pl-5 border-l-2 text-base ${active === s.id ? "border-gold font-semibold" : "border-transparent"}`}>
                     {s.title}
                   </a>
