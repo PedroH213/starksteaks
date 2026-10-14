@@ -223,6 +223,18 @@ function Index() {
       <footer className="bg-ink border-t border-gold/25 px-4 py-10 text-center">
         <img src={logo.url} alt="Stark & Steak" className="mx-auto w-40 h-auto" />
         <p className="text-soft text-base mt-4">Projeto escolar de empreendedorismo - não é um estabelecimento real</p>
+        <p className="text-soft text-sm mt-2">
+          Desenvolvido por Pedro Ferreira
+          <span className="mx-2" aria-hidden="true">·</span>
+          <a
+            href="https://github.com/PedroH213"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold underline-offset-4 hover:underline"
+          >
+            GitHub
+          </a>
+        </p>
       </footer>
     </div>
   );
