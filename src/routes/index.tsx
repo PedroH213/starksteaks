@@ -150,7 +150,7 @@ function Index() {
         <ul className="flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
           {menu.map((s) => (
             <li key={s.id} className="shrink-0">
-              <a id={`chip-${s.id}`} href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}
+              <a id={`chip-${s.id}`} href={`#${s.id}`} onClick={() => select(s.id)} aria-current={active === s.id ? "true" : undefined}
                 className={`flex items-center min-h-11 px-4 rounded-full border text-base transition-colors ${active === s.id ? "bg-gold text-ink border-gold font-semibold" : "text-soft border-gold/30 hover:border-gold"}`}>
                 {s.title}
               </a>
@@ -165,7 +165,7 @@ function Index() {
             <ul className="border-l border-gold/25">
               {menu.map((s) => (
                 <li key={s.id}>
-                  <a href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}
+                  <a href={`#${s.id}`} onClick={() => select(s.id)} aria-current={active === s.id ? "true" : undefined}
                     className={`${link(s.id)} -ml-px pl-5 border-l-2 text-base ${active === s.id ? "border-gold font-semibold" : "border-transparent"}`}>
                     {s.title}
                   </a>
