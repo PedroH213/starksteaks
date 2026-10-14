@@ -163,7 +163,7 @@
 body {
   font-family: var(--font-body);
   color: oklch(1 0 0);
-  background: radial-gradient(ellipse at center, var(--wine) 40%, var(--wine-deep) 100%) fixed;
+  background: radial-gradient(ellipse at center, var(--wine) 40%, var(--wine-deep) 100%);
   min-height: 100vh;
 }
 html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
