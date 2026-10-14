@@ -133,7 +133,11 @@ function Index() {
   };
 
   useEffect(() => {
-    document.getElementById(`chip-${active}`)?.scrollIntoView({ block: "nearest", inline: "center" });
+    const chip = document.getElementById(`chip-${active}`);
+    const bar = chip?.closest("ul");
+    if (!chip || !bar) return;
+    const left = chip.offsetLeft - (bar.clientWidth - chip.offsetWidth) / 2;
+    bar.scrollTo({ left, behavior: "smooth" });
   }, [active]);
 
   const link = (id: string) => `flex items-center min-h-11 transition-colors ${active === id ? "text-gold" : "text-soft hover:text-gold"}`;
