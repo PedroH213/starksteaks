@@ -102,11 +102,11 @@ function Index() {
       if (Date.now() < lockUntil.current) return;
       const doc = document.documentElement;
       if (window.scrollY + window.innerHeight >= doc.scrollHeight - 4) {
-        setActive(menu[menu.length - 1].id);
+        setActive(menu[menu.length - 1]!.id);
         return;
       }
       const line = window.innerHeight * 0.3;
-      let current = menu[0].id;
+      let current = menu[0]!.id;
       for (const s of menu) {
         const el = document.getElementById(s.id);
         if (el && el.getBoundingClientRect().top <= line) current = s.id;
