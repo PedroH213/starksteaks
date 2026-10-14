@@ -74,15 +74,18 @@ const menu: Section[] = [
 
 function Card({ it }: { it: Item }) {
   return (
-    <article className="reveal menu-card group overflow-hidden relative p-3">
-      <div className="overflow-hidden rounded-xl aspect-[4/3]">
+    <article className="menu-card group overflow-hidden relative flex md:flex-col h-full gap-4 md:gap-0 p-3 md:p-3">
+      <div className="overflow-hidden rounded-lg md:rounded-xl size-24 md:size-auto md:aspect-[4/3] shrink-0">
         <img src={it.img} alt={`${it.name}: ${it.desc}`} loading="lazy" width={1024} height={768} className="h-full w-full object-cover" />
       </div>
-      {it.tag && <span className="badge-outline absolute top-6 left-6">{it.tag}</span>}
-      <div className="px-2 pt-4 pb-2">
-        <h3 className="font-title text-xl">{it.name}</h3>
-        <p className="text-soft text-sm mt-1 truncate">{it.desc}</p>
-        <p className="text-gold font-semibold text-lg text-right mt-3">R$ {it.price}</p>
+      {it.tag && <span className="badge-outline absolute hidden md:inline top-6 left-6">{it.tag}</span>}
+      <div className="flex-1 min-w-0 flex md:flex-col gap-3 md:gap-0 md:px-2 md:pt-4 md:pb-2">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-title text-lg md:text-xl leading-tight">{it.name}</h3>
+          <p className="text-soft text-base md:text-sm mt-1 line-clamp-2">{it.desc}</p>
+          {it.tag && <span className="badge-outline inline-block mt-2 md:hidden">{it.tag}</span>}
+        </div>
+        <p className="text-gold font-semibold text-base md:text-lg tabular shrink-0 md:text-right md:mt-auto md:pt-3 whitespace-nowrap">R$ {it.price}</p>
       </div>
     </article>
   );
@@ -92,36 +95,34 @@ function Index() {
   const [active, setActive] = useState("pratos");
 
   useEffect(() => {
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => e.isIntersecting && (e.target.classList.add("is-visible"), io.unobserve(e.target))),
-      { threshold: 0.1 },
-    );
-    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
     const spy = new IntersectionObserver(
       (es) => es.forEach((e) => e.isIntersecting && setActive(e.target.id)),
-      { rootMargin: "-40% 0px -55% 0px" },
+      { rootMargin: "-30% 0px -60% 0px" },
     );
     menu.forEach((s) => { const el = document.getElementById(s.id); if (el) spy.observe(el); });
-    return () => { io.disconnect(); spy.disconnect(); };
+    return () => spy.disconnect();
   }, []);
 
+  useEffect(() => {
+    document.getElementById(`chip-${active}`)?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [active]);
+
+  const link = (id: string) => `flex items-center min-h-11 transition-colors ${active === id ? "text-gold" : "text-soft hover:text-gold"}`;
+
   return (
-    <>
-      <header className="px-4 pt-12 pb-10 text-center">
+    <div className="overflow-x-clip">
+      <header className="enter px-4 pt-12 pb-10 lg:pb-16 text-center">
         <img src={logo.url} alt="Stark & Steak - Premium Steakhouse" className="mx-auto w-full max-w-md h-auto" />
         <div className="gold-rule max-w-xs mx-auto mt-4" />
-        <p className="label-caps text-gold text-sm mt-4">Cardápio</p>
+        <p className="text-gold text-lg mt-4 font-title">Cardápio</p>
       </header>
 
-      <nav aria-label="Categorias" className="sticky top-0 z-20 bg-ink/95 backdrop-blur border-y border-gold/25">
-        <ul className="flex gap-6 overflow-x-auto px-5 py-4 max-w-6xl mx-auto sm:justify-center">
+      <nav aria-label="Categorias" className="lg:hidden sticky top-0 z-20 bg-ink/95 backdrop-blur border-y border-gold/25">
+        <ul className="flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
           {menu.map((s) => (
             <li key={s.id} className="shrink-0">
-              <a
-                href={`#${s.id}`}
-                aria-current={active === s.id ? "true" : undefined}
-                className={`label-caps text-xs pb-1 border-b transition-colors ${active === s.id ? "text-gold border-gold" : "text-soft border-transparent hover:text-gold"}`}
-              >
+              <a id={`chip-${s.id}`} href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}
+                className={`flex items-center min-h-11 px-4 rounded-full border text-base transition-colors ${active === s.id ? "bg-gold text-ink border-gold font-semibold" : "text-soft border-gold/30 hover:border-gold"}`}>
                 {s.title}
               </a>
             </li>
@@ -129,53 +130,71 @@ function Index() {
         </ul>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
-        {menu.map((s, i) => (
-          <section key={s.id} id={s.id} aria-labelledby={`${s.id}-t`} className={i ? "pt-16" : ""}>
-            {i > 0 && <div className="gold-rule mb-16" />}
-            <h2 id={`${s.id}-t`} className="reveal label-caps text-gold text-center text-lg sm:text-xl font-semibold mb-10">{s.title}</h2>
+      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-10 py-12 lg:py-0 lg:pb-24 lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-16">
+        <aside className="hidden lg:block">
+          <nav aria-label="Categorias" className="sticky top-8">
+            <ul className="border-l border-gold/25">
+              {menu.map((s) => (
+                <li key={s.id}>
+                  <a href={`#${s.id}`} aria-current={active === s.id ? "true" : undefined}
+                    className={`${link(s.id)} -ml-px pl-5 border-l-2 text-base ${active === s.id ? "border-gold font-semibold" : "border-transparent"}`}>
+                    {s.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
 
-            {s.id === "pratos" && (
-              <article className="reveal menu-card group overflow-hidden grid md:grid-cols-2 mb-8">
-                <div className="overflow-hidden aspect-[4/3] md:aspect-auto">
-                  <img src={featured.img} alt={`${featured.name}: ${featured.desc}`} width={1024} height={768} className="h-full w-full object-cover" />
-                </div>
-                <div className="p-8 sm:p-10 flex flex-col justify-center">
-                  <span className="badge-gold self-start">{featured.tag}</span>
-                  <h3 className="font-title text-3xl sm:text-4xl mt-5">{featured.name}</h3>
-                  <p className="text-soft mt-2">{featured.desc}</p>
-                  <p className="text-gold font-semibold text-2xl mt-6">R$ {featured.price}</p>
-                </div>
-              </article>
-            )}
-
-            {s.list ? (
-              <ul className="reveal menu-card max-w-2xl mx-auto p-6 sm:p-10 space-y-6">
-                {s.items.map((it) => (
-                  <li key={it.name}>
-                    <div className="flex items-baseline gap-3">
-                      <span className="font-title text-lg">{it.name}</span>
-                      {it.tag && <span className="badge-outline shrink-0">{it.tag}</span>}
-                      <span className="dotted-leader" aria-hidden="true" />
-                      <span className="text-gold font-semibold shrink-0">R$ {it.price}</span>
-                    </div>
-                    <p className="text-soft text-sm mt-1">{it.desc}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {s.items.map((it) => <Card key={it.name} it={it} />)}
+        <main>
+          {menu.map((s, i) => (
+            <section key={s.id} id={s.id} aria-labelledby={`${s.id}-t`} className={i ? "mt-12 lg:mt-20" : ""}>
+              <div className="flex items-center gap-4 mb-6 lg:mb-8">
+                <h2 id={`${s.id}-t`} className="font-title text-3xl lg:text-4xl shrink-0">{s.title}</h2>
+                <div className="h-px flex-1 bg-gold/60" />
               </div>
-            )}
-          </section>
-        ))}
-      </main>
+
+              {s.id === "pratos" && (
+                <article className="menu-card group overflow-hidden grid md:grid-cols-2 mb-6">
+                  <div className="overflow-hidden aspect-[4/3] md:aspect-auto md:min-h-80">
+                    <img src={featured.img} alt={`${featured.name}: ${featured.desc}`} width={1024} height={768} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="p-6 sm:p-10 flex flex-col justify-center">
+                    <span className="badge-gold self-start">{featured.tag}</span>
+                    <h3 className="font-title text-3xl sm:text-4xl mt-4">{featured.name}</h3>
+                    <p className="text-soft text-base mt-2">{featured.desc}</p>
+                    <p className="text-gold font-semibold text-2xl mt-6 tabular">R$ {featured.price}</p>
+                  </div>
+                </article>
+              )}
+
+              {s.list ? (
+                <ul className="menu-card p-6 sm:p-8 grid md:grid-cols-2 gap-x-12 gap-y-5">
+                  {s.items.map((it) => (
+                    <li key={it.name}>
+                      <div className="flex items-baseline gap-3">
+                        <span className="font-title text-lg">{it.name}</span>
+                        <span className="dotted-leader" aria-hidden="true" />
+                        <span className="text-gold font-semibold shrink-0 tabular">R$ {it.price}</span>
+                      </div>
+                      <p className="text-soft text-base mt-1">{it.desc}{it.tag && <span className="badge-outline ml-2 align-middle">{it.tag}</span>}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {s.items.map((it) => <Card key={it.name} it={it} />)}
+                </div>
+              )}
+            </section>
+          ))}
+        </main>
+      </div>
 
       <footer className="bg-ink border-t border-gold/25 px-4 py-10 text-center">
         <img src={logo.url} alt="Stark & Steak" className="mx-auto w-40 h-auto" />
-        <p className="text-soft text-sm mt-4">Projeto escolar de empreendedorismo - não é um estabelecimento real</p>
+        <p className="text-soft text-base mt-4">Projeto escolar de empreendedorismo - não é um estabelecimento real</p>
       </footer>
-    </>
+    </div>
   );
 }
